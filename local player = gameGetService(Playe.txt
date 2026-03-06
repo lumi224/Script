@@ -1,0 +1,72 @@
+local player = game:GetService("Players").LocalPlayer
+local StarterGui = game:GetService("StarterGui")
+local playerGui = player:WaitForChild("PlayerGui")
+
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "UniscriptChatGui"
+screenGui.ResetOnSpawn = false
+screenGui.IgnoreGuiInset = true
+screenGui.Parent = playerGui
+
+local frame = Instance.new("Frame",screenGui)
+frame.Size = UDim2.new(0,400,0,200)
+frame.Position = UDim2.new(0.5,-200,0.5,-100)
+frame.BackgroundColor3 = Color3.fromRGB(20,20,20)
+frame.Active = true
+frame.Draggable = true
+Instance.new("UICorner",frame).CornerRadius = UDim.new(0,12)
+
+local title = Instance.new("TextLabel",frame)
+title.Size = UDim2.new(1,0,0,30)
+title.BackgroundTransparency = 1
+title.Text = "Uniscript Chat Sender"
+title.TextColor3 = Color3.fromRGB(255,255,255)
+title.TextSize = 18
+title.Font = Enum.Font.GothamBold
+
+local close = Instance.new("TextButton",frame)
+close.Size = UDim2.new(0,30,0,30)
+close.Position = UDim2.new(1,-35,0,5)
+close.BackgroundTransparency = 1
+close.Text = "X"
+close.TextColor3 = Color3.fromRGB(255,0,0)
+close.TextSize = 20
+close.MouseButton1Click:Connect(function() screenGui:Destroy() end)
+
+local input = Instance.new("TextBox",frame)
+input.Size = UDim2.new(1,-40,0,50)
+input.Position = UDim2.new(0,20,0,50)
+input.BackgroundColor3 = Color3.fromRGB(40,40,40)
+input.PlaceholderText = "Type your message here..."
+input.TextColor3 = Color3.fromRGB(255,255,255)
+input.TextSize = 18
+input.Font = Enum.Font.Gotham
+Instance.new("UICorner",input).CornerRadius = UDim.new(0,12)
+Instance.new("UIStroke",input).Color = Color3.fromRGB(255,255,255)
+
+local send = Instance.new("TextButton",frame)
+send.Size = UDim2.new(0,120,0,50)
+send.Position = UDim2.new(1,-140,0,50)
+send.BackgroundColor3 = Color3.fromRGB(40,40,40)
+send.Text = "SEND"
+send.TextSize = 18
+send.Font = Enum.Font.GothamSemibold
+Instance.new("UICorner",send).CornerRadius = UDim.new(0,12)
+Instance.new("UIStroke",send).Color = Color3.fromRGB(255,255,255)
+
+local function sendMsg()
+    local msg = input.Text
+    if msg:gsub("%s+","") ~= "" then
+        pcall(function()
+            local ce = game:GetService("ReplicatedStorage"):FindFirstChild("DefaultChatSystemChatEvents")
+            if ce and ce:FindFirstChild("SayMessageRequest") then
+                ce.SayMessageRequest:FireServer(msg,"All")
+                input.Text = ""
+                StarterGui:SetCore("SendNotification",{Title="Uniscript",Text="Message sent!",Duration=2})
+            end
+        end)
+    end
+end
+
+send.MouseButton1Click:Connect(sendMsg)
+input.FocusLost:Connect(function(enter) if enter then sendMsg() end end)
